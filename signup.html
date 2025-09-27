@@ -178,7 +178,7 @@ a:hover {
       // Having the background smoothly fade in as soon as it loads
       const backgroundImageLoader = new Image();
       backgroundImageLoader.onload = () => { document.body.classList.add('bg-loaded') };
-      backgroundImageLoader.src = 'purple-background.png';
+      backgroundImageLoader.src = 'img/sign-up-background.png';
     </script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -363,7 +363,6 @@ a:hover {
     </script>
   </head>
   <body>
-    <div id="background-image"></div>
     <div class="form-container">
       <h1>Sign Up</h1>
       <form id="signup-form">
