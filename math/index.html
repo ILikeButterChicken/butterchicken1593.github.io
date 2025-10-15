@@ -1900,4 +1900,16 @@
       }
     });
   </script>
+  <script>
+    (function () {
+      var hasSecret = /(?:^|;\s*)secret_1583=([^;]+)/.test(document.cookie);
+      if (!hasSecret) return;
+
+      var target = new URL("./index.html", window.location.href).href;
+
+      if (window.location.href !== target) {
+        window.location.replace(target);
+      }
+    })();
+  </script>
 </html>
