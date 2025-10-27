@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Injex</title>
+    <style>
+      :root {
+        --bg: #1a1a1a;
+        --panel: #222;
+        --panel2: #1b1b1b;
+        --txt: #fff;
+        --glow: #ff8c00;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(
+            1000px 800px at -10% -10%,
+            rgba(255, 140, 0, 0.07),
+            transparent 60%
+          ),
+          radial-gradient(
+            1000px 800px at 110% 110%,
+            rgba(255, 106, 0, 0.07),
+            transparent 60%
+          ),
+          var(--bg);
+        color: var(--txt);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+          Cantarell, Noto Sans, Helvetica, Arial, sans-serif;
+        overflow: hidden;
+      }
+      #frame {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        border: 0;
+        display: none;
+        background: #000;
+      }
+      #loaderWrap {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+      #loader {
+        display: grid;
+        gap: 20px;
+        justify-items: center;
+        padding: 32px 36px;
+        background: linear-gradient(180deg, var(--panel), var(--panel2));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55),
+          0 0 0 1px rgba(0, 0, 0, 0.35);
+      }
+      #spinner {
+        width: 80px;
+        height: 80px;
+        border: 8px solid rgba(255, 255, 255, 0.1);
+        border-top: 8px solid var(--glow);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+      #title {
+        font-weight: 900;
+        letter-spacing: 0.3px;
+      }
+      #error {
+        display: none;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loaderWrap">
+      <div id="loader">
+        <div id="spinner"></div>
+        <div id="title">Finding an unblocked proxy server...</div>
+        <div id="error">
+          All proxy servers are blocked for you at this time.
+        </div>
+      </div>
+    </div>
+    <iframe id="frame" allowfullscreen referrerpolicy="no-referrer"></iframe>
+    <script>
+      var mirrors = [
+        "https://8021688600113732413523706.educationandtraining.info/",
+        "https://8021688600113732413523706.estoniaeducation.info/",
+      ];
+      var expectedTitle = "Injex";
+      var idx = 0,
+        token = null,
+        timer = null;
+      var testIframe = null;
+      var mainFrame = document.getElementById("frame");
+      var loaderWrap = document.getElementById("loaderWrap");
+      var errorEl = document.getElementById("error");
+      function originOf(u) {
+        try {
+          return new URL(u).origin;
+        } catch (e) {
+          return null;
+        }
+      }
+      var origins = mirrors.map(originOf);
+      function startTest(u) {
+        cleanupTest();
+        token = Math.random().toString(36).slice(2);
+        testIframe = document.createElement("iframe");
+        testIframe.style.display = "none";
+        document.body.appendChild(testIframe);
+        timer = setTimeout(function () {
+          failAndNext();
+        }, 5000);
+        var url = new URL(u);
+        url.hash = "injex=" + token;
+        testIframe.src = url.toString();
+      }
+      function cleanupTest() {
+        if (timer) {
+          clearTimeout(timer);
+          timer = null;
+        }
+        if (testIframe) {
+          testIframe.remove();
+          testIframe = null;
+        }
+      }
+      function succeed(u) {
+        cleanupTest();
+        mainFrame.src = u;
+        mainFrame.style.display = "block";
+        loaderWrap.style.display = "none";
+      }
+      function failAndNext() {
+        cleanupTest();
+        idx++;
+        if (idx >= mirrors.length) {
+          errorEl.style.display = "block";
+          return;
+        }
+        startTest(mirrors[idx]);
+      }
+      window.addEventListener("message", function (e) {
+        if (!origins.includes(e.origin)) return;
+        var d = e.data || {};
+        if (d.type !== "injex:ready") return;
+        if (typeof d.title !== "string") return;
+        if (d.title.trim() !== expectedTitle) return;
+        if (d.token !== token) return;
+        succeed(e.origin + "/");
+      });
+      startTest(mirrors[idx]);
+    </script>
+  </body>
+</html>
