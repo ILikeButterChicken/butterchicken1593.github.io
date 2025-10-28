@@ -1239,7 +1239,27 @@
 				});
 			});
 		</script>
-	</head> 
+	</head>
+    <div id="sdProxyPopupContainer">
+        <div id="sdProxyPopup">
+          <p>Strongdog now has a proxy! Yes there are bugs in it, lots of logins don't work and youtube doesent work, please don't make bug reports if your issue is one of these. You can access it in the apps tab in the top. It is called "Injex"</p>
+          <button id="sdProxyPopupOk">OK</button>
+        </div>
+    </div>      
+    <script>
+        (function(){
+          function has(n){return document.cookie.split('; ').some(function(p){return p.indexOf(n+'=1')===0})}
+          function set(n){document.cookie=n+'=1;path=/;max-age='+(60*60*24*365*5)}
+          var c=document.getElementById('sdProxyPopupContainer');
+          var b=document.getElementById('sdProxyPopupOk');
+          if(!c||!b) return;
+          if(has('proxyPopupShown')) return;
+          c.classList.add('active');
+          function close(){c.classList.remove('active');set('proxyPopupShown')}
+          c.addEventListener('click',function(e){if(e.target===c) close()});
+          b.addEventListener('click',close);
+        })();
+    </script>        
 	<body>
 		<div class="navbar">
 			<div class="menu-icon" id="menuIcon">☰</div>
@@ -1282,6 +1302,16 @@
 							<div class="app-title">Nova AI</div>
 						</a>
 
+                        <a
+                        href="./injex.html"
+                        class="app-item"
+                        style="text-decoration: none; color: inherit"
+                    >
+                        <div class="app-icon">
+                            <img src="./img/injex.png" alt="Injex" />
+                        </div>
+                        <div class="app-title">Injex</div>
+                        </a>
 					</div>
 				</div>
 				<input
