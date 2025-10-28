@@ -34,6 +34,8 @@ p{margin:0;opacity:.9}
 small{opacity:.75}
 #error{display:none;color:#ff6666}
 .hidden{display:none}
+#embed{position:fixed;inset:0;background:#000;display:none;z-index:9999}
+#embed iframe{width:100%;height:100%;border:0;display:block}
 </style>
 </head>
 <body>
@@ -56,6 +58,7 @@ small{opacity:.75}
     </div>
   </div>
 </div>
+<div id="embed"><iframe id="embedFrame"></iframe></div>
 <script>
 (function(){
   var mirrors=[
@@ -81,6 +84,12 @@ small{opacity:.75}
   var timers=new Array(mirrors.length).fill(null);
   var frames=new Array(mirrors.length).fill(null);
   var firstOrigin=null;
+  var embed=document.getElementById("embed");
+  var embedFrame=document.getElementById("embedFrame");
+  function openEmbed(url){
+    embedFrame.src=url;
+    embed.style.display="block";
+  }
   function render(){
     list.innerHTML="";
     var anyU=false,anyT=false,anyB=false;
@@ -90,7 +99,7 @@ small{opacity:.75}
       var name=document.createElement("strong");name.textContent=r.label;
       var badge=document.createElement("span");badge.className="badge "+(r.status==="unblocked"?"ok":r.status==="blocked"?"bad":"test");badge.textContent=r.status==="unblocked"?"Unblocked":r.status==="blocked"?"Blocked":"Testing";
       left.appendChild(name);left.appendChild(badge);
-      var btn=document.createElement("button");btn.type="button";btn.className="btn";btn.textContent="Open";btn.onclick=function(){window.location.href=r.origin};
+      var btn=document.createElement("button");btn.type="button";btn.className="btn";btn.textContent="Open";btn.onclick=function(){openEmbed(r.origin)};
       row.appendChild(left);row.appendChild(btn);
       list.appendChild(row);
       anyU=anyU||r.status==="unblocked";anyB=anyB||r.status==="blocked";anyT=anyT||r.status==="testing";
@@ -149,7 +158,7 @@ small{opacity:.75}
     }
     finalizeIfDone();
   });
-  openNow.onclick=function(){if(firstOrigin)window.location.href=firstOrigin};
+  openNow.onclick=function(){if(firstOrigin)openEmbed(firstOrigin)};
   function applyManualVisibility(){
     manual.style.display=toggle.checked?"block":"none";
     localStorage.setItem("injex_manual_mode",toggle.checked?"1":"0");
