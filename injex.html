@@ -56,21 +56,35 @@ small{opacity:.75}
     </div>
   </div>
 </div>
-
 <script>
 (function(){
   var mirrors=[
     "https://8021688600113732413547102395624276084104729385610293875616.estoniaeducation.info/",
-    "https://8021688600113732413547102395624276084104729385613928573282.educationandtraining.info/"
+    "https://8021688600113732413547102395624276084104729385613928573282.educationandtraining.info/",
+    "https://8021688600113732483727102395624276084104729385610293875616.foothillsbible.org/",
+    "https://8021688600113732413547102395624276482734729385610293875616.smarthomesllc.org/",
+    "https://8021688600113732413547102302937276084104729385610293875616.wilcorw.org/",
+    "https://8021688600113732413547102395624276084104208565610293875616.alertconference.org/"
   ];
-  var expectedTitle="Injex", idx=0, token=null, testFrame=null, timer=null, firstOrigin=null;
-  var spinner=document.getElementById("spinner"),title=document.getElementById("title"),status=document.getElementById("status"),autoRow=document.getElementById("autoRow"),openNow=document.getElementById("openNow"),toggle=document.getElementById("toggleManual"),manual=document.getElementById("manual"),list=document.getElementById("serverList"),errorEl=document.getElementById("error");
+  var expectedTitle="Injex";
+  var spinner=document.getElementById("spinner");
+  var title=document.getElementById("title");
+  var status=document.getElementById("status");
+  var autoRow=document.getElementById("autoRow");
+  var openNow=document.getElementById("openNow");
+  var toggle=document.getElementById("toggleManual");
+  var manual=document.getElementById("manual");
+  var list=document.getElementById("serverList");
+  var errorEl=document.getElementById("error");
   var results=mirrors.map((u,i)=>({label:"Server "+(i+1),origin:u,status:"testing"}));
-
+  var tokens=mirrors.map(()=>Math.random().toString(36).slice(2));
+  var timers=new Array(mirrors.length).fill(null);
+  var frames=new Array(mirrors.length).fill(null);
+  var firstOrigin=null;
   function render(){
     list.innerHTML="";
     var anyU=false,anyT=false,anyB=false;
-    results.forEach((r,i)=>{
+    results.forEach((r)=>{
       var row=document.createElement("div");row.className="item";
       var left=document.createElement("div");left.className="left";
       var name=document.createElement("strong");name.textContent=r.label;
@@ -83,40 +97,69 @@ small{opacity:.75}
     });
     errorEl.style.display=(!anyU&&!anyT&&anyB)?"block":"none";
   }
-
-  function cleanup(){
-    if(timer){clearTimeout(timer);timer=null}
-    if(testFrame){testFrame.remove();testFrame=null}
+  function cleanupOne(i){
+    if(timers[i]){clearTimeout(timers[i]);timers[i]=null}
+    if(frames[i]){frames[i].remove();frames[i]=null}
   }
-
-  function testNext(){
-    cleanup();
-    if(idx>=mirrors.length){spinner.classList.add("hidden");if(!firstOrigin){title.textContent="No unblocked server found";status.textContent="Try manual mode below";errorEl.style.display="block"}return}
-    token=Math.random().toString(36).slice(2);
-    var host=mirrors[idx];
-    testFrame=document.createElement("iframe");
-    testFrame.style.display="none";
-    document.body.appendChild(testFrame);
-    timer=setTimeout(function(){results[idx].status="blocked";render();idx++;testNext()},4000);
-    var u=new URL(host);u.hash="injex="+token;
-    testFrame.src=u.toString();
+  function allFinished(){
+    return results.every(r=>r.status!=="testing");
   }
-
+  function finalizeIfDone(){
+    if(allFinished()&&!firstOrigin){
+      spinner.classList.add("hidden");
+      title.textContent="No unblocked server found";
+      status.textContent="Try manual mode below";
+      errorEl.style.display="block";
+    }
+  }
+  function startTests(){
+    var timeoutMs=1800;
+    mirrors.forEach(function(host,i){
+      var f=document.createElement("iframe");
+      f.style.display="none";
+      document.body.appendChild(f);
+      frames[i]=f;
+      timers[i]=setTimeout(function(){
+        results[i].status="blocked";
+        render();
+        cleanupOne(i);
+        finalizeIfDone();
+      },timeoutMs);
+      var u=new URL(host);u.hash="injex="+tokens[i];
+      f.src=u.toString();
+    });
+  }
   window.addEventListener("message",function(e){
     var d=e.data||{};
     if(d.type!=="injex:ready")return;
     if(d.title!==expectedTitle)return;
-    if(d.token!==token)return;
-    cleanup();
+    var idx=tokens.indexOf(d.token);
+    if(idx<0)return;
+    cleanupOne(idx);
     var origin=new URL(mirrors[idx]).origin+"/";
-    results[idx].status="unblocked";results[idx].origin=origin;render();
-    if(!firstOrigin){firstOrigin=origin;spinner.classList.add("hidden");title.textContent="Unblocked server found!";status.textContent="Ready to launch";autoRow.classList.remove("hidden")}
-    idx++;testNext();
+    results[idx].status="unblocked";
+    results[idx].origin=origin;
+    render();
+    if(!firstOrigin){
+      firstOrigin=origin;
+      spinner.classList.add("hidden");
+      title.textContent="Unblocked server found!";
+      status.textContent="Ready to launch";
+      autoRow.classList.remove("hidden");
+    }
+    finalizeIfDone();
   });
-
   openNow.onclick=function(){if(firstOrigin)window.location.href=firstOrigin};
-  toggle.onchange=function(){manual.style.display=this.checked?"block":"none"};
-  render();testNext();
+  function applyManualVisibility(){
+    manual.style.display=toggle.checked?"block":"none";
+    localStorage.setItem("injex_manual_mode",toggle.checked?"1":"0");
+  }
+  var saved=localStorage.getItem("injex_manual_mode");
+  if(saved==="1"){toggle.checked=true}
+  applyManualVisibility();
+  toggle.onchange=applyManualVisibility;
+  render();
+  startTests();
 })();
 </script>
 </body>
