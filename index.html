@@ -1242,7 +1242,8 @@
 	</head>
     <div id="sdProxyPopupContainer">
         <div id="sdProxyPopup">
-          <p>For some reason the proxy is showing as a "dangerous site." We are working on fixing this, please don't make any more bug reports about this issu. It should be working within a few days, if you were NOT having this issue you can continue using it as normal.</p>
+          <p>For the strongdog proxy, if it shows that the site is malicious, you can still access it if you press details and clcik "Continue to this unsafe site." If you don't trust that it isn't malicious, you don't have to log in, I have requested the site to get reviewed by google but this can take a few weeks.
+		  </p>
           <button id="sdProxyPopupOk">OK</button>
         </div>
     </div>      
@@ -1256,7 +1257,7 @@
 		  function setCookie(name) {
 			document.cookie = name + '=1;path=/;max-age=' + (60*60*24*365*5);
 		  }
-		  var cookieName = 'proxyErrorShown';
+		  var cookieName = 'proxyErrorFixShown';
 		  var container = document.getElementById('sdProxyPopupContainer');
 		  var okButton = document.getElementById('sdProxyPopupOk');
 		  if (!container || !okButton) return;
