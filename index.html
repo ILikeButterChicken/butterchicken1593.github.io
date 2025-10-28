@@ -1242,24 +1242,37 @@
 	</head>
     <div id="sdProxyPopupContainer">
         <div id="sdProxyPopup">
-          <p>Strongdog now has a proxy! Yes there are bugs in it, lots of logins don't work and youtube doesent work, please don't make bug reports if your issue is one of these. You can access it in the apps tab in the top. It is called "Injex"</p>
+          <p>For some reason the proxy is showing as a "dangerous site." We are working on fixing this, please don't make any more bug reports about this issu. It should be working within a few days, if you were NOT having this issue you can continue using it as normal.</p>
           <button id="sdProxyPopupOk">OK</button>
         </div>
     </div>      
-    <script>
-        (function(){
-          function has(n){return document.cookie.split('; ').some(function(p){return p.indexOf(n+'=1')===0})}
-          function set(n){document.cookie=n+'=1;path=/;max-age='+(60*60*24*365*5)}
-          var c=document.getElementById('sdProxyPopupContainer');
-          var b=document.getElementById('sdProxyPopupOk');
-          if(!c||!b) return;
-          if(has('proxyPopupShown')) return;
-          c.classList.add('active');
-          function close(){c.classList.remove('active');set('proxyPopupShown')}
-          c.addEventListener('click',function(e){if(e.target===c) close()});
-          b.addEventListener('click',close);
-        })();
-    </script>        
+	<script>
+		(function(){
+		  function hasCookie(name) {
+			return document.cookie.split('; ').some(function(p){
+			  return p.indexOf(name + '=1') === 0;
+			});
+		  }
+		  function setCookie(name) {
+			document.cookie = name + '=1;path=/;max-age=' + (60*60*24*365*5);
+		  }
+		  var cookieName = 'proxyErrorShown';
+		  var container = document.getElementById('sdProxyPopupContainer');
+		  var okButton = document.getElementById('sdProxyPopupOk');
+		  if (!container || !okButton) return;
+		  if (hasCookie(cookieName)) return;
+		  container.classList.add('active');
+		  function closePopup() {
+			container.classList.remove('active');
+			setCookie(cookieName);
+		  }
+		  container.addEventListener('click', function(e){
+			if (e.target === container) closePopup();
+		  });
+		  okButton.addEventListener('click', closePopup);
+		})();
+		</script>
+		   
 	<body>
 		<div class="navbar">
 			<div class="menu-icon" id="menuIcon">☰</div>
